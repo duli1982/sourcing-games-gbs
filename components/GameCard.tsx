@@ -10,11 +10,10 @@ interface GameCardProps {
 }
 
 const GameCard: React.FC<GameCardProps> = ({ game }) => {
-    const { player, updateScore } = useAppContext();
+    const { player, updateScore, addToast } = useAppContext();
     const [submission, setSubmission] = useState('');
     const [feedback, setFeedback] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
-    const [currentScore, setCurrentScore] = useState(0);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -23,24 +22,36 @@ const GameCard: React.FC<GameCardProps> = ({ game }) => {
         setIsLoading(true);
         setFeedback(null);
 
-        const prompt = game.promptGenerator(submission);
-        const responseText = await getGeminiResponse(prompt);
+        try {
+            const prompt = game.promptGenerator(submission);
+            const responseText = await getGeminiResponse(prompt);
 
-        const scoreMatch = responseText.match(/SCORE: (\d+)/);
-        let score = 0;
-        if (scoreMatch) {
-            score = parseInt(scoreMatch[1], 10);
-            updateScore(score);
+            if(responseText.startsWith("Error:")) {
+                throw new Error(responseText);
+            }
+
+            const scoreMatch = responseText.match(/SCORE: (\d+)/);
+            let score = 0;
+            if (scoreMatch) {
+                score = parseInt(scoreMatch[1], 10);
+                updateScore(score);
+                addToast(`Score updated! +${score} points`, 'success');
+            }
+            
+            const feedbackHtml = responseText
+                .replace(/SCORE: \d+/g, `<h3>Your Score: <strong class="text-cyan-400">${score}/100</strong></h3>`)
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\n/g, '<br />');
+
+            setFeedback(feedbackHtml);
+
+        } catch (error) {
+            const message = error instanceof Error ? error.message : "An unknown error occurred.";
+            setFeedback(`<p class="text-red-400">${message}</p>`);
+            addToast(message, 'error');
+        } finally {
+            setIsLoading(false);
         }
-        
-        const feedbackHtml = responseText
-            .replace(/SCORE: \d+/g, `<h3>Your Score for this submission: <strong class="text-cyan-400">${score}/100</strong></h3>`)
-            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-            .replace(/\n/g, '<br />');
-
-        setCurrentScore(score);
-        setFeedback(feedbackHtml);
-        setIsLoading(false);
     };
 
     return (
@@ -59,30 +70,35 @@ const GameCard: React.FC<GameCardProps> = ({ game }) => {
                     onChange={e => setSubmission(e.target.value)}
                     className="w-full bg-gray-700 border border-gray-600 rounded-md p-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
                     placeholder={game.placeholder}
+                    aria-label={`Submission for ${game.title}`}
                 ></textarea>
                 <button
                     type="submit"
                     disabled={isLoading}
-                    className="mt-4 bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-4 rounded-md transition duration-300 disabled:bg-gray-500 disabled:cursor-not-allowed"
+                    className="mt-4 bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-4 rounded-md transition duration-300 disabled:bg-gray-500 disabled:cursor-not-allowed flex items-center"
+                    aria-live="polite"
                 >
                     {isLoading ? 'Getting Feedback...' : 'Submit & Get Feedback'}
                 </button>
             </form>
 
-            {(isLoading || feedback) && (
-                <div className="mt-6">
+            <div className="mt-6" aria-live="polite" aria-busy={isLoading}>
+                {isLoading && (
                     <div className="flex items-center mb-4">
                         <h4 className="text-2xl font-bold text-cyan-400">AI Coach Feedback</h4>
-                        {isLoading && <Spinner />}
+                        <Spinner />
                     </div>
-                    {feedback && (
+                )}
+                {feedback && (
+                    <>
+                        {!isLoading && <h4 className="text-2xl font-bold text-cyan-400 mb-4">AI Coach Feedback</h4>}
                         <div
                             className="bg-gray-700 p-6 rounded-lg prose prose-invert max-w-none text-gray-300"
                             dangerouslySetInnerHTML={{ __html: feedback }}
                         />
-                    )}
-                </div>
-            )}
+                    </>
+                )}
+            </div>
         </div>
     );
 };

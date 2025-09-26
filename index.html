@@ -9,15 +9,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script>
-      // This is a placeholder for the Gemini API key.
-      // In a real-world scenario, this would be handled securely.
-      process = {
-        env: {
-          API_KEY: "YOUR_API_KEY_HERE" // Replace with a valid API key for local testing if needed
-        }
-      }
-    </script>
     <style>
       body {
         font-family: 'Inter', sans-serif;
@@ -32,6 +23,43 @@
         background-color: #4a5568; /* gray-600 */
         border-radius: 20px;
         border: 3px solid #1a202c; /* gray-900 */
+      }
+      /* Page Transitions */
+      .page {
+        display: none;
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+      }
+      .page.active {
+        display: block;
+        opacity: 1;
+      }
+      /* Toast Animations */
+      @keyframes toast-in {
+        from {
+          transform: translateY(-20px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+      @keyframes toast-out {
+        from {
+          transform: translateY(0);
+          opacity: 1;
+        }
+        to {
+          transform: translateY(-20px);
+          opacity: 0;
+        }
+      }
+      .toast-in {
+        animation: toast-in 0.3s ease-in-out forwards;
+      }
+      .toast-out {
+        animation: toast-out 0.3s ease-in-out forwards;
       }
     </style>
   <script type="importmap">

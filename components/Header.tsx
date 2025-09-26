@@ -4,6 +4,7 @@ import { Page } from '../types';
 
 interface HeaderProps {
     onNavigate: (page: Page) => void;
+    currentPage: Page;
 }
 
 const navItems: { page: Page; label: string }[] = [
@@ -14,7 +15,7 @@ const navItems: { page: Page; label: string }[] = [
     { page: 'learning', label: 'Learning Hub' },
 ];
 
-const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
+const Header: React.FC<HeaderProps> = ({ onNavigate, currentPage }) => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     const handleNavClick = (page: Page) => {
@@ -29,13 +30,19 @@ const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
                     <h1 className="text-2xl font-bold text-white">AI Sourcing League</h1>
                     <p className="text-sm text-cyan-400">Powered by Randstad & Gemini</p>
                 </div>
-                <div className="hidden md:flex space-x-4">
+                <div className="hidden md:flex space-x-2">
                     {navItems.map(item => (
-                         <button key={item.page} onClick={() => handleNavClick(item.page)} className="text-gray-300 hover:text-white transition-colors duration-200">{item.label}</button>
+                         <button 
+                            key={item.page} 
+                            onClick={() => handleNavClick(item.page)} 
+                            className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${currentPage === item.page ? 'bg-cyan-600 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'}`}
+                        >
+                            {item.label}
+                        </button>
                     ))}
                 </div>
                 <div className="md:hidden">
-                    <button id="mobileMenuButton" className="text-white focus:outline-none" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+                    <button id="mobileMenuButton" aria-label="Open menu" className="text-white focus:outline-none" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
                     </button>
                 </div>
@@ -44,7 +51,13 @@ const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
             {isMobileMenuOpen && (
                  <div className="md:hidden">
                     {navItems.map(item => (
-                        <button key={item.page} onClick={() => handleNavClick(item.page)} className="block w-full text-left py-2 px-4 text-sm text-gray-300 hover:bg-gray-700">{item.label}</button>
+                        <button 
+                            key={item.page} 
+                            onClick={() => handleNavClick(item.page)} 
+                            className={`block w-full text-left py-2 px-4 text-sm  transition-colors duration-200 ${currentPage === item.page ? 'bg-cyan-600 text-white' : 'text-gray-300 hover:bg-gray-700'}`}
+                        >
+                            {item.label}
+                        </button>
                     ))}
                 </div>
             )}

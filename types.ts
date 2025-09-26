@@ -21,3 +21,11 @@ export interface Game {
     placeholder: string;
     promptGenerator: (submission: string) => string;
 }
+
+export type ToastType = 'success' | 'error' | 'info';
+
+export interface Toast {
+    id: number;
+    message: string;
+    type: ToastType;
+}

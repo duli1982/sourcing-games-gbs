@@ -8,28 +8,12 @@ import GamesPage from './pages/GamesPage';
 import CoachPage from './pages/CoachPage';
 import LeaderboardPage from './pages/LeaderboardPage';
 import LearningHubPage from './pages/LearningHubPage';
+import Toast from './components/Toast';
 import { Page } from './types';
 
 const App: React.FC = () => {
-  const { player, currentPage, setCurrentPage } = useAppContext();
+  const { player, currentPage, setCurrentPage, toasts } = useAppContext();
 
-  const renderPage = () => {
-    switch (currentPage) {
-      case 'home':
-        return <HomePage />;
-      case 'games':
-        return <GamesPage />;
-      case 'coach':
-        return <CoachPage />;
-      case 'leaderboard':
-        return <LeaderboardPage />;
-      case 'learning':
-        return <LearningHubPage />;
-      default:
-        return <HomePage />;
-    }
-  };
-  
   const handleNavigate = (page: Page) => {
     setCurrentPage(page);
   };
@@ -40,10 +24,22 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
-      <Header onNavigate={handleNavigate} />
+      <Header onNavigate={handleNavigate} currentPage={currentPage} />
       <main className="container mx-auto p-6">
-        {renderPage()}
+        <div className="relative">
+          {/* By applying the 'active' class, we can control visibility and transitions via CSS */}
+          <div className={`page ${currentPage === 'home' ? 'active' : ''}`}><HomePage /></div>
+          <div className={`page ${currentPage === 'games' ? 'active' : ''}`}><GamesPage /></div>
+          <div className={`page ${currentPage === 'coach' ? 'active' : ''}`}><CoachPage /></div>
+          <div className={`page ${currentPage === 'leaderboard' ? 'active' : ''}`}><LeaderboardPage /></div>
+          <div className={`page ${currentPage === 'learning' ? 'active' : ''}`}><LearningHubPage /></div>
+        </div>
       </main>
+      <div className="fixed top-5 right-5 z-50 space-y-2">
+        {toasts.map((toast) => (
+          <Toast key={toast.id} message={toast.message} type={toast.type} id={toast.id} />
+        ))}
+      </div>
     </div>
   );
 };
